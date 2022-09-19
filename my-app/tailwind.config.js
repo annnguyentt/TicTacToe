@@ -5,7 +5,10 @@ module.exports = {
   ],
   theme: {
     extend: {
-    },
+      fontFamily: {
+        'Fredoka-One': 'Fredoka One',
+      },
+    }
   },
   plugins: [],
 }
