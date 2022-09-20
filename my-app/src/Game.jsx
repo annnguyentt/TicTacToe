@@ -70,15 +70,37 @@ class RenderConfetti extends React.Component {
     }
 };
 
+function PlayerTurn() {
+    return (
+        <div className="flex items-center justify-center pt-9 text-white font-bold">
+            <div className="grid grid-cols-3 text-center">
+                <div>
+                    <h2>PLAYER 1 (X)</h2>
+                    <div>1</div>
+                </div>
+                <div>
+                    <h2>TIE</h2>
+                    <div>1</div>
+                </div>
+                <div>
+                    <h2>PLAYER 2 (O)</h2>
+                    <div>2</div>
+                </div>
+            </div>
+        </div>
+    )
+}
+
 
 class Game extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
             squares: Array(9).fill(""),
+            isStartedWithO: false,
             isONext: true,
             winner: null,
-            winningLocation: Array(3).fill(null)
+            winningLocation: Array(3).fill(null),
         }
     }
 
@@ -86,7 +108,13 @@ class Game extends React.Component {
         const newSquares = this.state.squares.slice();
         const winner = calculateWinner(newSquares).winner;
 
-        if (winner || newSquares[i]) {
+        if (winner) {
+            this.setState({
+                isStartedWithO: !this.state.isStartedWithO
+            })
+            return;
+        }
+        else if (winner || newSquares[i]) {
             return;
         }
         newSquares[i] = this.state.isONext ? 'X' : 'O';
@@ -109,12 +137,13 @@ class Game extends React.Component {
         const winner = this.state.winner;
         let label = winner ? 'Winner ' + winner :
             !this.state.squares.some(isNull) ? 'Draw' :
-                this.state.isONext ? 'Player X' : 'Player O'
+                this.state.isONext ? 'Player 1 - X' : 'Player 2 - O'
         return (
             <div>
+                <h1 className="text-4xl pt-10 text-white font-bold flex items-center justify-center font-Fredoka-One">
+                    Tic-Tac-Toe</h1>
                 <div>
-                    <div> {winner ? <RenderConfetti /> : null}</div>
-                    <div className="flex items-center justify-center pt-8 text-white text-2xl font-semibold">{label}</div>
+                    <PlayerTurn />
                     <Board
                         squares={this.state.squares}
                         onClick={i => this.handleClick(i)}
@@ -139,6 +168,7 @@ class Game extends React.Component {
                         </button>
                     </div>
                 </div>
+                <div> {winner ? <RenderConfetti /> : null}</div>
             </div>
         )
     }
