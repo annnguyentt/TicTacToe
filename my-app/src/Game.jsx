@@ -3,7 +3,7 @@ import Confetti from 'react-confetti'
 
 
 function Square({ onClick, value, isHighlighted } = {}) {
-    const defaultClass = "Square font-Fredoka-One w-full text-5xl transition ease-in-out border-2 border-white "
+    const defaultClass = "Square font-Fredoka-One w-full text-6xl transition ease-in-out border-2 border-white "
     return (
         <button
             onClick={() => { onClick() }}
@@ -70,24 +70,33 @@ class RenderConfetti extends React.Component {
     }
 };
 
-function Scores({ value } = {}) {
+function Scores({ value, isONext, label } = {}) {
+    const enableClass = "text-white";
+    const disableClass = "text-indigo-300";
+
     return (
         <div className="flex items-center justify-center pt-9 text-white font-bold">
-            <div className="grid grid-cols-3 text-center">
-                <div>
+            <div className="grid grid-cols-3 text-center text-lg">
+                <div className={
+                    label ? enableClass :
+                        isONext ? enableClass : disableClass}>
                     <h2>PLAYER 1 (X)</h2>
                     <div>{value[0]}</div>
                 </div>
-                <div>
+                <div className={
+                    label ? enableClass : disableClass
+                }>
                     <h2>TIE</h2>
                     <div>{value[1]}</div>
                 </div>
-                <div>
+                <div className={
+                    label ? enableClass :
+                        isONext ? disableClass : enableClass}>
                     <h2>PLAYER 2 (O)</h2>
                     <div>{value[2]}</div>
                 </div>
             </div>
-        </div>
+        </div >
     )
 }
 
@@ -122,10 +131,9 @@ class Game extends React.Component {
                 newScores[0] += 1
             } else if (newWinner === 'O') {
                 newScores[2] += 1
+            } else if (newWinner === 'Draw') {
+                newScores[1] += 1
             }
-        }
-        else if (!newSquares.some(isNull)) {
-            newScores[1] += 1;
         }
 
         this.setState({
@@ -140,6 +148,7 @@ class Game extends React.Component {
         const copiedIsStartedWithX = this.state.isStartedWithX;
         this.setState({
             squares: Array(9).fill(null),
+            winner: null,
             isStartedWithX: !copiedIsStartedWithX,
             isONext: !copiedIsStartedWithX
         })
@@ -162,11 +171,11 @@ class Game extends React.Component {
             <div>
                 <h1 className="text-4xl pt-10 text-white font-bold flex items-center justify-center font-Fredoka-One">
                     Tic-Tac-Toe</h1>
-                <div>
-                    <Scores
-                        value={this.state.scores}
-                    />
-                </div>
+                <Scores
+                    value={this.state.scores}
+                    isONext={this.state.isONext}
+                    label={this.state.winner}
+                />
                 <div>
                     <Board
                         squares={this.state.squares}
@@ -192,7 +201,7 @@ class Game extends React.Component {
                         </button>
                     </div>
                 </div>
-                <div> {winner ? <RenderConfetti /> : null}</div>
+                <div> {['X', 'O'].includes(winner) ? <RenderConfetti /> : null}</div>
             </div>
         )
     }
@@ -229,6 +238,9 @@ function calculateWinner(squares) {
             winnerResult.location = score;
             return winnerResult;
         }
+    }
+    if (!squares.some(isNull)) {
+        winnerResult.winner = 'Draw';
     }
     return winnerResult;
 }
