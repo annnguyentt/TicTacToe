@@ -70,21 +70,21 @@ class RenderConfetti extends React.Component {
     }
 };
 
-function PlayerTurn() {
+function Scores({ value } = {}) {
     return (
         <div className="flex items-center justify-center pt-9 text-white font-bold">
             <div className="grid grid-cols-3 text-center">
                 <div>
                     <h2>PLAYER 1 (X)</h2>
-                    <div>1</div>
+                    <div>{value[0]}</div>
                 </div>
                 <div>
                     <h2>TIE</h2>
-                    <div>1</div>
+                    <div>{value[1]}</div>
                 </div>
                 <div>
                     <h2>PLAYER 2 (O)</h2>
-                    <div>2</div>
+                    <div>{value[2]}</div>
                 </div>
             </div>
         </div>
@@ -97,10 +97,11 @@ class Game extends React.Component {
         super(props);
         this.state = {
             squares: Array(9).fill(""),
-            isStartedWithO: false,
+            isStartedWithX: true,
             isONext: true,
             winner: null,
             winningLocation: Array(3).fill(null),
+            scores: Array(3).fill(0)
         }
     }
 
@@ -108,42 +109,65 @@ class Game extends React.Component {
         const newSquares = this.state.squares.slice();
         const winner = calculateWinner(newSquares).winner;
 
-        if (winner) {
-            this.setState({
-                isStartedWithO: !this.state.isStartedWithO
-            })
+        if (winner || newSquares[i]) {
             return;
         }
-        else if (winner || newSquares[i]) {
-            return;
-        }
+
         newSquares[i] = this.state.isONext ? 'X' : 'O';
+        const newWinner = calculateWinner(newSquares).winner;
+        let newScores = this.state.scores;
+
+        if (newWinner) {
+            if (newWinner === 'X') {
+                newScores[0] += 1
+            } else if (newWinner === 'O') {
+                newScores[2] += 1
+            }
+        }
+        else if (!newSquares.some(isNull)) {
+            newScores[1] += 1;
+        }
+
         this.setState({
             squares: newSquares,
             isONext: !this.state.isONext,
-            winner: calculateWinner(newSquares).winner,
+            winner: newWinner,
+            scores: newScores
         })
     }
 
-    jumpToStart() {
-        const newSquares = Array(9).fill(null);
+    startNewGame() {
+        const copiedIsStartedWithX = this.state.isStartedWithX;
         this.setState({
-            squares: newSquares,
-            isONext: true
+            squares: Array(9).fill(null),
+            isStartedWithX: !copiedIsStartedWithX,
+            isONext: !copiedIsStartedWithX
+        })
+    }
+
+    startNewScoreboard() {
+        this.setState({
+            squares: Array(9).fill(""),
+            isStartedWithX: true,
+            isONext: true,
+            winner: null,
+            winningLocation: Array(3).fill(null),
+            scores: Array(3).fill(0)
         })
     }
 
     render() {
         const winner = this.state.winner;
-        let label = winner ? 'Winner ' + winner :
-            !this.state.squares.some(isNull) ? 'Draw' :
-                this.state.isONext ? 'Player 1 - X' : 'Player 2 - O'
         return (
             <div>
                 <h1 className="text-4xl pt-10 text-white font-bold flex items-center justify-center font-Fredoka-One">
                     Tic-Tac-Toe</h1>
                 <div>
-                    <PlayerTurn />
+                    <Scores
+                        value={this.state.scores}
+                    />
+                </div>
+                <div>
                     <Board
                         squares={this.state.squares}
                         onClick={i => this.handleClick(i)}
@@ -154,7 +178,7 @@ class Game extends React.Component {
                                         bg-white rounded p-2 uppercase font-semibold tracking-wide w-36
                                         hover:bg-gradient-to-r from-indigo-300 via-purple-300 to-pink-300
                                         hover:text-white"
-                            onClick={() => this.jumpToStart()}
+                            onClick={() => this.startNewGame()}
                         >
                             New game
                         </button>
@@ -162,7 +186,7 @@ class Game extends React.Component {
                                         bg-white rounded p-2 uppercase font-semibold tracking-wide w-36
                                         hover:bg-gradient-to-r from-indigo-300 via-purple-300 to-pink-300
                                         hover:text-white"
-                            onClick={() => this.jumpToStart()}
+                            onClick={() => this.startNewScoreboard()}
                         >
                             Reset scores
                         </button>
@@ -177,6 +201,7 @@ class Game extends React.Component {
 function isNull(i) {
     return !i
 }
+
 
 function calculateWinner(squares) {
     let winnerResult = {
@@ -207,5 +232,7 @@ function calculateWinner(squares) {
     }
     return winnerResult;
 }
+
+
 
 export default Game;
